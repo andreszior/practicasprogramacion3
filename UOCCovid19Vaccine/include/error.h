@@ -12,6 +12,8 @@ typedef enum {
     ERR_INVALID_INDEX = -6,
     ERR_EMPTY = -7,
     ERR_EMPTY_LIST = -8,
+	ERR_INVALID_COUNTRY= -9,
+	ERR_INVALID_VACCINE= -10
 } tError;
 
 #endif // __ERROR_H__

@@ -4,13 +4,13 @@
 #include <stdbool.h>
 #include "error.h"
 #include "commons.h"
-#include "country.h"
 #include "vaccine.h"
+#include "patient.h"
 
 // Data type to hold data related to a Developer
 typedef struct {
     char* name;
-    tCountry* country;
+    char* country;
     tVaccine* vaccine;
 } tDeveloper;
 
@@ -33,7 +33,7 @@ typedef struct {
 // **** Functions related to management of tDeveloper objects
 
 // Initialize a developer object
-tError developer_init(tDeveloper* dev, const char* name, tCountry* country, tVaccine* vaccine);
+tError developer_init(tDeveloper* dev, const char* name, const char* country, tVaccine* vaccine);
 
 // Release memory used by developer object
 void developer_free(tDeveloper* object);

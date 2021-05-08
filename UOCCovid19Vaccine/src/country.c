@@ -1,9 +1,11 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <assert.h>
 #include <limits.h>
 #include <ctype.h>
 #include "country.h"
+#include "patient.h"
 
 // **** Functions related to management of tCountry objects
 
@@ -17,10 +19,11 @@ tError country_init(tCountry* country, const char* name, bool isEU) {
     // text plus 1 space for the "end of string" char '\0'.
     // To allocate memory we use the malloc command.
     country->name = (char*)malloc((strlen(name) + 1) * sizeof(char));
+    country->authVaccines = (tVaccineTable*)malloc(sizeof(tVaccineTable));
 
     // Check that memory has been allocated for all fields.
     // Pointer must be different from NULL.
-    if(country->name == NULL) {
+    if(country->name == NULL || country->authVaccines == NULL) {
         // Some of the fields have a NULL value, what means that we found
         // some problem allocating the memory
         return ERR_MEMORY_ERROR;
@@ -32,6 +35,30 @@ tError country_init(tCountry* country, const char* name, bool isEU) {
 
     // Initialize the rest of fields
     country->isEU = isEU;
+
+    // Initialize vaccines table
+    vaccineTable_init(country->authVaccines);
+
+    // PR2 EX1
+    // Initialize patients queue
+    country->patients = (tPatientQueue*)malloc(sizeof(tPatientQueue));
+    if(country->patients == NULL) {
+        free(country->name);
+        return ERR_MEMORY_ERROR;
+    }
+
+    patientQueue_create(country->patients);
+
+    // PR3 EX2
+    // Initialize vaccination batch stack
+    country->vbList = (tVaccinationBatchList*)malloc(sizeof(tVaccinationBatchList));
+    if(country->vbList == NULL) {
+        free(country->name);
+        free(country->patients);
+        return ERR_MEMORY_ERROR;
+    }
+
+    vaccinationBatchList_create(country->vbList);
 
     return OK;
 }
@@ -47,10 +74,35 @@ void country_free(tCountry* object) {
         free(object->name);
         object->name = NULL;
     }
+
+    // Free table of authorized vaccines
+    if(object->authVaccines != NULL) {
+        vaccineTable_free(object->authVaccines);
+
+        free(object->authVaccines);
+        object->authVaccines = NULL;
+    }
+
+    // PR2 EX2
+    // free patients queue
+    if(object->patients != NULL) {
+		patientQueue_free(object->patients);
+		free(object->patients); 
+		object->patients = NULL;
+	}
+
+
+    // PR3 EX2
+    // free vaccination batch stack
+    if(object->vbList != NULL) {
+        vaccinationBatchList_free(object->vbList);
+        free(object->vbList);
+		object->vbList = NULL;
+    }
 }
 
 // Compare two country objects
-bool country_equals(tCountry* country1, tCountry* country2) {
+bool country_equals(tCountry * country1, tCountry * country2) {
     // Verify pre conditions
     assert(country1 != NULL);
     assert(country2 != NULL);
@@ -71,7 +123,7 @@ bool country_equals(tCountry* country1, tCountry* country2) {
 }
 
 // Copy the data of a country to another country
-tError country_cpy(tCountry* dest, tCountry* src) {
+tError country_cpy(tCountry * dest, tCountry * src) {
     tError error;
 
     // Verify pre conditions
@@ -86,13 +138,164 @@ tError country_cpy(tCountry* dest, tCountry* src) {
     if(error != OK)
         return error;
 
+    // Copy authorized countries
+    error = vaccineTable_cpy(dest->authVaccines, src->authVaccines);
+    if(error != OK)
+        return error;
+
+    // Copy patient queue
+    error = patientQueue_duplicate(dest->patients, *src->patients);
+    if(error != OK)
+        return error;
+
+    // Copy vaccination batch stack
+    error = vaccinationBatchList_duplicate(dest->vbList, *src->vbList);
+    if(error != OK)
+        return error;
+
     return OK;
 }
+
+
+tVaccine* country_find_vaccine(tCountry * country, const char* name) {
+    int i;
+
+    // Verify pre conditions
+    assert(country != NULL);
+    assert(name != NULL);
+
+    // Search over the table and return once we found the element.
+    for(i = 0; i < country->authVaccines->size; i++) {
+        if(strcmp(country->authVaccines->elements[i].name, name) == 0) {
+            // We return the ADDRESS (&) of the element, which is a pointer to the element
+            return &(country->authVaccines->elements[i]);
+        }
+    }
+
+    // The element has not been found. Return NULL (empty pointer).
+    return NULL;
+}
+
+
+// Add a new patient
+tError country_addPatient(tCountry * country, tPatient patient) {
+    // PR2 EX1
+
+    // Check preconditions
+    assert(country != NULL);
+
+    // Enqueue the new patient
+    return patientQueue_enqueue(country->patients, patient);
+
+}
+
+// Add a new autorized vaccine
+tError country_addVaccine(tCountry * country, tVaccine vaccine) {
+    // PR2 EX1
+
+    // Check preconditions
+    assert(country != NULL);
+
+
+    // add the new vaccine
+    return vaccineTable_add(country->authVaccines, vaccine);
+
+}
+
+
+/*
+	tCountry
+	returns: 	the vaccine technology (tVaccineTechnology) that more patients from country_name.
+				If the country does not have patients, it returns NONE.
+*/
+tVaccineTec country_getMostUsedVaccineTechnology(tCountry country) {
+    // PR2 EX2
+    // Verify pre conditions
+
+    int arrayTechnologies[] = { 0, 0, 0, 0, 0, 0,  };
+    int mostUsedtechnology = NONE;
+    tVaccine * vaccine = NULL;
+
+    if(patientQueue_empty(*country.patients)) {
+        return NONE;
+    }
+
+    tPatientQueueNode *nodePtr = country.patients->first;
+
+    while(nodePtr != NULL) {
+        if(nodePtr->e.vaccine != NULL) {
+            vaccine = vaccineTable_find(country.authVaccines, nodePtr->e.vaccine);
+            if(vaccine != NULL) {
+                arrayTechnologies[vaccine->vaccineTec]++;
+                if(arrayTechnologies[vaccine->vaccineTec] > mostUsedtechnology) {
+                    mostUsedtechnology = vaccine->vaccineTec;
+                }
+            }
+        }
+        nodePtr = nodePtr->next;
+    }
+
+    return mostUsedtechnology;
+}
+
+int country_getPatientsPerVaccine(tCountry country, tVaccine vaccine) {
+    // PR2 EX3
+    tPatientQueue  copy_queue;
+
+    if(patientQueue_empty(*country.patients)) {
+        return 0;
+    }
+
+    if(!country_find_vaccine(&country, vaccine.name)) {
+        return 0;
+    }
+
+    patientQueue_duplicate(&copy_queue, *country.patients);
+
+    return patientQueue_getPatientsPerVaccineRecursive(&copy_queue, vaccine.name);
+}
+
+// count how many patients already vaccinated with a vaccine technology
+int country_getPatientsPerVaccineTechnology(tCountry country, tVaccineTec technology) {
+    // PR2 EX3
+    tPatientQueue copy_queue;
+
+    if(patientQueue_empty(*country.patients)) {
+        return 0;
+    }
+
+    if(vaccineTable_size(country.authVaccines) == 0) {
+        return 0;
+    }
+
+    patientQueue_duplicate(&copy_queue, *country.patients);
+
+    return patientQueue_getPatientsPerVaccineTechnologyRecursive(&copy_queue, *country.authVaccines, technology);
+}
+
+// inoculates all available doses of each batch of vaccines to the list of patients who have not received any vaccine
+tError country_inoculate_first_vaccine(tCountry* country) {
+    // PR3 EX2
+    return ERR_NOT_IMPLEMENTED;
+}
+
+// inoculates all available doses of each batch of vaccines to the list of patients who have received 1 vaccine
+tError country_inoculate_second_vaccine(tCountry* country) {
+    // PR3 EX2
+    return ERR_NOT_IMPLEMENTED;
+}
+
+// Returns the percentage of patients in the country who have been vaccinated with all doses
+double country_percentage_vaccinated(tCountry* country) {
+    // PR3 EX2
+    return 0.0;
+}
+
 
 // **** Functions related to management of tCountryTable objects
 
 // Initialize the table of countries
-void countryTable_init(tCountryTable* table) {
+void countryTable_init(tCountryTable * table) {
     // Verify pre conditions
     assert(table != NULL);
 
@@ -105,7 +308,7 @@ void countryTable_init(tCountryTable* table) {
 }
 
 // Release the memory used by countryTable structure
-void countryTable_free(tCountryTable* table) {
+void countryTable_free(tCountryTable * table) {
     int i;
 
     // Verify pre conditions
@@ -124,7 +327,7 @@ void countryTable_free(tCountryTable* table) {
 }
 
 // Add a new country to the table
-tError countryTable_add(tCountryTable* table, tCountry* country) {
+tError countryTable_add(tCountryTable * table, tCountry * country) {
     tCountry* elementsAux;
     tError error;
 
@@ -186,7 +389,7 @@ tError countryTable_add(tCountryTable* table, tCountry* country) {
 }
 
 // Remove a country from the table
-tError countryTable_remove(tCountryTable* table, tCountry* country) {
+tError countryTable_remove(tCountryTable * table, tCountry * country) {
     bool found;
     int i;
     tCountry* elementsAux;
@@ -247,7 +450,7 @@ tError countryTable_remove(tCountryTable* table, tCountry* country) {
 }
 
 // Get country by name
-tCountry* countryTable_find(tCountryTable* table, const char* name) {
+tCountry* countryTable_find(tCountryTable * table, const char* name) {
     int i;
 
     // Verify pre conditions
@@ -267,7 +470,7 @@ tCountry* countryTable_find(tCountryTable* table, const char* name) {
 }
 
 // Get the size of the table
-unsigned int countryTable_size(tCountryTable* table) {
+unsigned int countryTable_size(tCountryTable * table) {
     // Verify pre conditions
     assert(table != NULL);
 
@@ -298,4 +501,73 @@ tError countryTable_cpy(tCountryTable* dest, tCountryTable* src) {
     }
 
     return OK;
+}
+
+// Prints basic information from the tCountryTable table on the screen
+void countryTable_print(tCountryTable table) {
+    int i;
+
+
+    for(i = 0; i < table.size; i++) {
+        country_print(table.elements[i]);
+    }
+    printf("\n");
+}
+
+// prints basic information from the tCountry on the screen
+void country_print(tCountry country) {
+    printf("%s\n", country.name);
+    vaccineTable_print(*country.authVaccines);
+    patientQueue_print(*country.patients);
+}
+
+// Add a patient to a country
+tError countryTable_addPatient(tCountryTable * table, const char* name, tPatient patient) {
+    assert(table != NULL);
+    assert(name != NULL);
+    tCountry * country;
+
+    country = countryTable_find(table, name);
+    if(country == NULL) {
+        return ERR_INVALID_COUNTRY;
+    }
+
+    return country_addPatient(country, patient);
+}
+
+// Add authorized vaccine to a country
+tError countryTable_addVaccine(tCountryTable * table, const char* name, tVaccine vaccine) {
+    assert(table != NULL);
+    assert(name != NULL);
+    tCountry * country;
+
+    country = countryTable_find(table, name);
+    if(country == NULL) {
+        return ERR_INVALID_COUNTRY;
+    }
+
+    return country_addVaccine(country, vaccine);
+}
+
+// Returns the number of tCountries that have an authorized vaccine
+int countryTable_num_authorized(tCountryTable * table) {
+    // PR1 EX3
+    int i;
+    int count;
+
+    // Verify pre conditions
+    assert(table != NULL);
+
+    // Search for countries with one or more authorized vaccines.
+    count = 0;
+    for(i = 0; i < table->size; i++) {
+        // Check the number of authorized countries
+        if(vaccineTable_size(table->elements[i].authVaccines) > 0) {
+            // increase the number of developers
+            count = count + 1;
+        }
+    }
+
+    // Return the number of developers found.
+    return count;
 }

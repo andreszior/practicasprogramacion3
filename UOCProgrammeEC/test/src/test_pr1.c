@@ -57,8 +57,12 @@ bool run_pr1_ex1(tTestSection* test_section) {
 
     err = country_init(&country1, "Spain", true);
 
-    if(err != OK)
+    if(err != OK){
         failed = true;
+	}
+	else if (!patientQueue_empty(*country1.patients)){
+		failed = true;
+	}
 
     err = country_init(&country2, "United Kingdom", false);
 
@@ -220,6 +224,7 @@ bool run_pr1_ex1(tTestSection* test_section) {
         end_test(test_section, "PR1_EX1_6", true);
     }
 
+
     // Remove used memory
     country_free(&country1);
     country_free(&country2);
@@ -258,16 +263,16 @@ bool run_pr1_ex2(tTestSection* test_section) {
         end_test(test_section, "PR1_EX2_1", true);
     }
 
-    // TEST 2: Adding an authorized country to a vaccine
+    // TEST 2: Adding an authorized vaccine  to a country
     failed = false;
-    start_test(test_section, "PR1_EX2_2", "Adding an authorized country to a vaccine");
+    start_test(test_section, "PR1_EX2_2", "Adding an authorized vaccine to a country");
 
     err = vaccine_init(&vac2, "mRNA-1273", RNA, PHASE3);
     if(err != OK) {
         failed = true;
     }
 
-    err = vaccine_add_authorized_country(&vac2, &country1);
+    err = country_addVaccine(&country1,vac2);
     if(err != OK) {
         failed = true;
     }
@@ -349,25 +354,25 @@ bool run_pr1_ex3(tTestSection* test_section) {
     vaccine_init(&vac3, "AZD1222", ADENOVIRUSES, PHASE3); //AstraZeneca
     vaccine_init(&vac4, "XYZ", SARSCOV2, PHASE1_2); //fake
 
-    vaccine_add_authorized_country(&vac1, &country1);
-    vaccine_add_authorized_country(&vac1, &country3);
+    country_addVaccine(&country1,vac1);
+    country_addVaccine(&country3,vac1 );
 
-    vaccine_add_authorized_country(&vac2, &country1);
-    vaccine_add_authorized_country(&vac2, &country2);
-    vaccine_add_authorized_country(&vac2, &country3);
+    country_addVaccine(&country1,vac2);
+    country_addVaccine(&country2,vac2);
+    country_addVaccine(&country3,vac2);
 
-    vaccine_add_authorized_country(&vac3, &country1);
+    country_addVaccine(&country1,vac3);
 
     // TEST 1: Initialize developers
     failed = false;
     start_test(test_section, "PR1_EX3_1", "Initialize developers");
 
-    err = developer_init(&dev1, "Pfizer", &country3, &vac1);
+    err = developer_init(&dev1, "Pfizer", "EEUU", &vac1);
     if (err != OK || strcmp(dev1.name, "Pfizer") != 0) {
         failed = true;
     }
 
-    err = developer_init(&dev2, "Moderna", &country3, &vac2);
+    err = developer_init(&dev2, "Moderna", "EEUU", &vac2);
     if (err != OK || strcmp(dev2.name, "Moderna") != 0) {
         failed = true;
     }
@@ -398,7 +403,7 @@ bool run_pr1_ex3(tTestSection* test_section) {
     failed = false;
     start_test(test_section, "PR1_EX3_3", "Compare different developers");
 
-    err = developer_init(&dev3, "AstraZeneca", &country2, &vac3);
+    err = developer_init(&dev3, "AstraZeneca", "United Kingdom", &vac3);
     if(err != OK) {
         failed = true;
     }
@@ -521,47 +526,18 @@ bool run_pr1_ex3(tTestSection* test_section) {
     }
 
     // PRETEST: Create a table with 4 developers (3 authorized, 1 non-authorized)
-    developer_init(&dev4, "Pfizer", &country3, &vac1);
-    developer_init(&dev5, "Moderna", &country3, &vac2);
-    developer_init(&dev6, "AstraZeneca", &country2, &vac3);
-    developer_init(&dev7, "FakeLab", &country1, &vac4);
+    developer_init(&dev4, "Pfizer", "EEUU" ,&vac1);
+    developer_init(&dev5, "Moderna", "EEUU", &vac2);
+    developer_init(&dev6, "AstraZeneca", "United Kingdom", &vac3);
+    developer_init(&dev7, "FakeLab", "Spain", &vac4);
     developerTable_init(&dev_tab2);
     developerTable_add(&dev_tab2, &dev4);
     developerTable_add(&dev_tab2, &dev5);
     developerTable_add(&dev_tab2, &dev6);
     developerTable_add(&dev_tab2, &dev7);
 
-    // TEST 8: Find the number of developers that have an authorized vaccine
-    failed = false;
-    start_test(test_section, "PR1_EX3_8", "Find the number of developers that have an authorized vaccine");
-
-    // there are 3 authorized vaccines
-    if(developerTable_num_authorized(&dev_tab2) != 3) {
-        failed = true;
-    }
-
-    if(failed) {
-        end_test(test_section, "PR1_EX3_8", false);
-        passed = false;
-    } else {
-        end_test(test_section, "PR1_EX3_8", true);
-    }
-
-    // TEST 9: Find vaccine with more authorized countries
-    failed = false;
-    start_test(test_section, "PR1_EX3_9", "Find vaccine with more authorized countries");
-
-    // vac2 is in the second developer, index 1.
-    if(developerTable_most_popular(&dev_tab2) != 1) {
-        failed = true;
-    }
-
-    if(failed) {
-        end_test(test_section, "PR1_EX3_9", false);
-        passed = false;
-    } else {
-        end_test(test_section, "PR1_EX3_9", true);
-    }
+    
+ 
 
     // Remove used memory
     country_free(&country1);
