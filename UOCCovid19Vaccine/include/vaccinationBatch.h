@@ -89,4 +89,5 @@ void vaccineBatchList_quickSortRecursive(tVaccinationBatchList *list, int head, 
 // Helper function - Print a queue in the console - use for debugging
 void vaccineBatchList_print(tVaccinationBatchList list);
 
+tError initElement(tVaccinationBatchListNode* node, tVaccineBatch vaccineBatch);
 #endif // __VACCINATION_BATCH__H__

@@ -9,6 +9,19 @@
 #include "vaccinationBatch.h"
 #include "country.h"
 
+void freeSpace(tVaccinationBatchListNode* node) { 
+	tVaccinationBatchListNode *temp = NULL;
+	
+
+	while(node != NULL) {
+		temp = node->next;
+		free(node);
+		node = temp;
+	}
+	
+	node = NULL;
+}
+
 // Initialize a vaccine batch
 tError vaccinationBatch_init(tVaccineBatch* vb, int id, tVaccine* vac, int num) {
     tError error;
@@ -94,10 +107,20 @@ tError vaccinationBatch_cpy(tVaccineBatch* dest, tVaccineBatch* src) {
     return OK;
 }
 
+
+
 // Create the list
 tError vaccinationBatchList_create(tVaccinationBatchList *list) {
     // PR3 EX1
-    return ERR_NOT_IMPLEMENTED;
+	//check pre-conditions
+	assert(list != NULL);
+	
+	//assign pointers to null
+	list->first = NULL;
+	list->last = NULL;
+	list->size = 0;
+	
+	return OK;
 }
 
 
@@ -105,34 +128,180 @@ tError vaccinationBatchList_create(tVaccinationBatchList *list) {
 // Will return true if list is empty
 bool vaccinationBatchList_empty(tVaccinationBatchList list) {
     // PR3 EX1
-
-    return true;
+	//check if there are elements in the list
+	if (list.first != NULL || list.size != 0){
+		return false;
+	}
+	return true;
 }
-
+tError initElement(tVaccinationBatchListNode* node, tVaccineBatch vaccineBatch) {
+	
+	tError err;
+	vaccinationBatch_free(&node->e);
+	err = vaccinationBatch_cpy(&node->e, &vaccineBatch);
+	if (err < 0) 
+		return ERR_MEMORY_ERROR;
+	 
+	return OK;
+}
 // Frees all elements in the list
 void vaccinationBatchList_free(tVaccinationBatchList *list) {
     // PR3 EX1
+	//check pre-conditions
+	assert(list != NULL);
+	tVaccinationBatchListNode *tmp = NULL;
+	tmp = (tVaccinationBatchListNode*)malloc(sizeof(tVaccinationBatchListNode));
+	
+	//Iterate the elementes in the list
+	while(!vaccinationBatchList_empty(*list)){
+		tmp = list->first->next;
+		vaccinationBatch_free(&list->first->e);
+		free(list->first);
+		list->first = tmp;
+		list->size--;
+	}
+	
+	//check post-conditions
+	assert(list->first == NULL);
+	assert(list->last == NULL);
+	
 }
+//aux function for getting previous node in the list
+tVaccinationBatchListNode* vaccineBatchList_getPrevious(tVaccinationBatchList* list, int index) {
+	int i;
+	tVaccinationBatchListNode* prev;
+	
+	i = 0;
+	prev = list->first;
+	while (i < index && (prev != NULL)) {
+		prev = prev->next;
+		i = i+1;
+	}
+	return prev;
+}
+
+
 
 // Insert/adds a new Vaccine Batch  to the tVaccinationBatchList
 tError vaccineBatchList_insert(tVaccinationBatchList* list, tVaccineBatch vaccineBatch, int index) {
     // PR3_EX1
-
-    return ERR_NOT_IMPLEMENTED;
+	
+	//check preconditions
+	assert(list != NULL);
+	assert(vaccineBatch.vaccine != NULL);
+	
+	//declare variables
+	tVaccinationBatchListNode *tmp = NULL;
+	tVaccinationBatchListNode *newNode = NULL;
+	
+	//Get memory for the aux variables
+	if (index > list->size) {
+		return ERR_MEMORY_ERROR;
+	} else if (index <= list->size) {
+		newNode = (tVaccinationBatchListNode*)malloc(sizeof(tVaccinationBatchListNode));	
+		//check if the memory has been allocated
+		if (newNode == NULL) {
+			return ERR_MEMORY_ERROR;
+		} else {
+			newNode->e.vaccine =  NULL;
+			newNode->e.lotID = 0;
+			newNode->e.quantity = 0;
+			if (initElement(newNode, vaccineBatch) < 0) {
+				freeSpace(newNode);
+				free(newNode);
+			} else {
+				if (index == 0) {
+					newNode->next = list->first;
+					list->first = newNode;
+				} else {
+					tmp = vaccineBatchList_get(*list, index - 1);
+					if (tmp != NULL) {
+						newNode->next = tmp->next;
+						tmp->next = newNode;
+					} else {
+						free(newNode);
+						newNode = NULL;	
+					}
+				}
+				//Update size list
+				list->size++;
+				
+				//Update position
+				if (index ==list->size){
+					list->last = newNode;
+				}
+			}
+				
+		}
+		//return OK;
+	}
+	return OK;
 }
 
 // Deletes a tBestVideoType from the tTopGender list
 tError vaccineBatchList_delete(tVaccinationBatchList* list, int index) {
     // PR3_EX1
-
-    return ERR_NOT_IMPLEMENTED;
+	
+	//check pre-conditions
+	//assert(list != NULL);
+	
+	//declare variables
+	tVaccinationBatchListNode *tmp = NULL;
+	tVaccinationBatchListNode *del = NULL;
+	tmp = (tVaccinationBatchListNode*)malloc(sizeof(tVaccinationBatchListNode));
+	
+	if (index > list->size - 1) {
+		return ERR_INVALID_INDEX;
+	} else if (vaccinationBatchList_empty(*list) == true) {
+		return ERR_EMPTY_LIST;
+	} else if (index == 0) {
+		tmp = list->first->next;
+		vaccinationBatch_free(&list->first->e);
+		free(list->first);
+		list->first = tmp;
+	} else {
+		//del->e.vaccine =  NULL;
+		//del->e.lotID = 0;
+		//del->e.quantity = 0;
+		del = vaccineBatchList_getPrevious(list, index - 1);
+		if (del != NULL) {
+			tmp = del->next;
+			if (tmp == NULL) {
+				return ERR_INVALID_INDEX;
+			} else {
+				del->next = tmp->next;
+			}
+		} else {
+			return ERR_INVALID_INDEX;
+		}
+	}
+		list->size--;
+		
+		if (list->size == 0) {
+			list->last = vaccineBatchList_get(*list, list->size);
+		} else {
+			list->last = NULL;
+		}
+		//FREE MEMORY
+		free(tmp);
+		return OK;
 }
 
 // Gets tVaccinationBatchListNode from given position, NULL if out of bounds
 tVaccinationBatchListNode* vaccineBatchList_get(tVaccinationBatchList list, int index) {
     // PR3_EX2
-
-    return NULL;
+	//check pre-conditions
+	//assert(list.first != NULL);
+	//declare variables
+	tVaccinationBatchListNode *currentNode;
+	
+	//Allocate memory
+	currentNode = vaccineBatchList_getPrevious(&list, index);
+	if (currentNode == NULL) {
+		return NULL;
+	} else {
+		return currentNode;
+	}
 }
 
 // Duplicate list
