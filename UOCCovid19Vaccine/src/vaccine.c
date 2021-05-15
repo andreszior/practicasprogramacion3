@@ -45,6 +45,7 @@ void vaccine_free(tVaccine* vac) {
 
     // All memory allocated with malloc and realloc needs to be freed using the free command.
     // In this case, as we use malloc to allocate the fields, we have to free them
+
     if(vac->name != NULL) {
         free(vac->name);
         vac->name = NULL;

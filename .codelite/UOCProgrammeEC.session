@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Session Name="/home/uoc/Desktop/UOC2020_2/UOCProgrammeEC.workspace">
+  <int Value="0" Name="m_selectedTab"/>
+  <wxString Value="/home/uoc/Desktop/UOC2020_2/UOCProgrammeEC.workspace" Name="m_workspaceName"/>
+  <TabInfoArray Name="TabInfoArray">
+    <TabInfo>
+      <wxString Value="/home/uoc/Desktop/UOC2020_2/UOCCovid19Vaccine/src/vaccinationBatch.c" Name="FileName"/>
+      <int Value="200" Name="FirstVisibleLine"/>
+      <int Value="205" Name="CurrentLine"/>
+      <wxArrayString Name="Bookmarks"/>
+      <IntVector Name="CollapsedFolds"/>
+    </TabInfo>
+    <TabInfo>
+      <wxString Value="/home/uoc/Desktop/UOC2020_2/UOCCovid19Vaccine/include/vaccinationBatch.h" Name="FileName"/>
+      <int Value="10" Name="FirstVisibleLine"/>
+      <int Value="11" Name="CurrentLine"/>
+      <wxArrayString Name="Bookmarks"/>
+      <IntVector Name="CollapsedFolds"/>
+    </TabInfo>
+    <TabInfo>
+      <wxString Value="/home/uoc/Desktop/UOC2020_2/UOCCovid19Vaccine/src/vaccine.c" Name="FileName"/>
+      <int Value="31" Name="FirstVisibleLine"/>
+      <int Value="48" Name="CurrentLine"/>
+      <wxArrayString Name="Bookmarks"/>
+      <IntVector Name="CollapsedFolds"/>
+    </TabInfo>
+    <TabInfo>
+      <wxString Value="/home/uoc/Desktop/UOC2020_2/UOCProgrammeEC/test/src/test_pr3.c" Name="FileName"/>
+      <int Value="363" Name="FirstVisibleLine"/>
+      <int Value="372" Name="CurrentLine"/>
+      <wxArrayString Name="Bookmarks"/>
+      <IntVector Name="CollapsedFolds"/>
+    </TabInfo>
+    <TabInfo>
+      <wxString Value="/home/uoc/Desktop/UOC2020_2/UOCCovid19Vaccine/include/error.h" Name="FileName"/>
+      <int Value="0" Name="FirstVisibleLine"/>
+      <int Value="0" Name="CurrentLine"/>
+      <wxArrayString Name="Bookmarks"/>
+      <IntVector Name="CollapsedFolds"/>
+    </TabInfo>
+    <TabInfo>
+      <wxString Value="/home/uoc/Desktop/UOC2020_2/UOCCovid19Vaccine/include/vaccine.h" Name="FileName"/>
+      <int Value="38" Name="FirstVisibleLine"/>
+      <int Value="36" Name="CurrentLine"/>
+      <wxArrayString Name="Bookmarks"/>
+      <IntVector Name="CollapsedFolds"/>
+    </TabInfo>
+    <TabInfo>
+      <wxString Value="/home/uoc/Desktop/UOC2020_2/UOCProgrammeEC/test/src/test_pr1.c" Name="FileName"/>
+      <int Value="311" Name="FirstVisibleLine"/>
+      <int Value="309" Name="CurrentLine"/>
+      <wxArrayString Name="Bookmarks"/>
+      <IntVector Name="CollapsedFolds"/>
+    </TabInfo>
+  </TabInfoArray>
+  <SerializedObject Name="m_breakpoints">
+    <long Value="3" Name="Count"/>
+    <SerializedObject Name="Breakpoint0">
+      <wxString Value="/home/uoc/Desktop/UOC2020_2/UOCCovid19Vaccine/src/vaccinationBatch.c" Name="file"/>
+      <int Value="140" Name="lineno"/>
+      <wxString Value="" Name="function_name"/>
+      <wxString Value="" Name="memory_address"/>
+      <int Value="1" Name="bp_type"/>
+      <int Value="0" Name="watchpoint_type"/>
+      <wxString Value="" Name="watchpt_data"/>
+      <CData Name="commandlist"/>
+      <bool Value="0" Name="regex"/>
+      <bool Value="0" Name="is_temp"/>
+      <bool Value="1" Name="is_enabled"/>
+      <int Value="0" Name="ignore_number"/>
+      <wxString Value="" Name="conditions"/>
+      <int Value="0" Name="origin"/>
+    </SerializedObject>
+    <SerializedObject Name="Breakpoint1">
+      <wxString Value="/home/uoc/Desktop/UOC2020_2/UOCCovid19Vaccine/src/vaccinationBatch.c" Name="file"/>
+      <int Value="141" Name="lineno"/>
+      <wxString Value="" Name="function_name"/>
+      <wxString Value="" Name="memory_address"/>
+      <int Value="1" Name="bp_type"/>
+      <int Value="0" Name="watchpoint_type"/>
+      <wxString Value="" Name="watchpt_data"/>
+      <CData Name="commandlist"/>
+      <bool Value="0" Name="regex"/>
+      <bool Value="0" Name="is_temp"/>
+      <bool Value="1" Name="is_enabled"/>
+      <int Value="0" Name="ignore_number"/>
+      <wxString Value="" Name="conditions"/>
+      <int Value="0" Name="origin"/>
+    </SerializedObject>
+    <SerializedObject Name="Breakpoint2">
+      <wxString Value="/home/uoc/Desktop/UOC2020_2/UOCCovid19Vaccine/src/vaccinationBatch.c" Name="file"/>
+      <int Value="142" Name="lineno"/>
+      <wxString Value="" Name="function_name"/>
+      <wxString Value="" Name="memory_address"/>
+      <int Value="1" Name="bp_type"/>
+      <int Value="0" Name="watchpoint_type"/>
+      <wxString Value="" Name="watchpt_data"/>
+      <CData Name="commandlist"/>
+      <bool Value="0" Name="regex"/>
+      <bool Value="0" Name="is_temp"/>
+      <bool Value="1" Name="is_enabled"/>
+      <int Value="0" Name="ignore_number"/>
+      <wxString Value="" Name="conditions"/>
+      <int Value="0" Name="origin"/>
+    </SerializedObject>
+  </SerializedObject>
+</Session>
